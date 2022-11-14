@@ -1,6 +1,10 @@
 package be.kuleuven.distributedsystems.cloud.auth;
 
 import be.kuleuven.distributedsystems.cloud.entities.User;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -15,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 
@@ -25,12 +30,24 @@ public class SecurityFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         // TODO: (level 1) decode Identity Token and assign correct email and role
         // TODO: (level 2) verify Identity Token
+        Base64.Decoder decoder = Base64.getUrlDecoder();
+        String payloadString = new String(decoder.decode(request.getHeader(HttpHeaders.AUTHORIZATION).split("\\.")[1]));
 
-        var user = new User("test@example.com", "");
-        SecurityContext context = SecurityContextHolder.getContext();
-        context.setAuthentication(new FirebaseAuthentication(user));
-
-        filterChain.doFilter(request, response);
+        JSONParser parser = new JSONParser();
+        JSONObject payload = null;
+        try {
+            payload = (JSONObject) parser.parse(payloadString);
+            String role = null;
+            if (payload.get("role") != null) {
+                role = payload.get("role").toString();
+            }
+            var user = new User(payload.get("email").toString(), role);
+            SecurityContext context = SecurityContextHolder.getContext();
+            context.setAuthentication(new FirebaseAuthentication(user));
+            filterChain.doFilter(request, response);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override

@@ -33,6 +33,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .authorizeRequests()
                 .antMatchers("/api/**/*").authenticated()
+                .antMatchers("/api/getAllBookings").hasRole("manager")
+                .antMatchers("/api/getBestCustomers").hasRole("manager")
                 .anyRequest().permitAll()
                 .and()
                 .addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,13 +1,8 @@
 package be.kuleuven.distributedsystems.cloud.controller;
 
-import be.kuleuven.distributedsystems.cloud.db.Db;
 import be.kuleuven.distributedsystems.cloud.entities.*;
-import org.eclipse.jetty.util.DateCache;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -227,11 +222,9 @@ public class APIController {
     public List<Booking> getBookings() {
         List<Booking> customerBookings = new ArrayList<>();
         for (Booking booking : bookings) {
-            System.out.println(getUser().getEmail());
-            if (booking.getCustomer() == getUser().getEmail()) {
+            if (booking.getCustomer().equals(getUser().getEmail())) {
                 customerBookings.add(booking);
             }
-            System.out.println(customerBookings);
         }
         return customerBookings;
     }
@@ -245,21 +238,24 @@ public class APIController {
         }
     }
 
-    @GetMapping ("/getBestCustomer")
-    public List<String> getBestCustomer() throws Exception {
+    @GetMapping ("/getBestCustomers")
+    public List<String> getBestCustomers() throws Exception {
         List<String> bestCustomers = new ArrayList<>();
         Map<String, Integer> nbOfTickets = new HashMap<>();
         if (getUser().isManager()) {
             bookings.forEach(booking -> {
                 if (nbOfTickets.containsKey(booking.getCustomer())) {
                     int oldValue = nbOfTickets.get(booking.getCustomer());
-                    nbOfTickets.put(booking.getCustomer(), oldValue + 1);
+                    nbOfTickets.put(booking.getCustomer(), oldValue + booking.getTickets().size());
                 }
                 else {
-                    nbOfTickets.put(booking.getCustomer(), 1);
+                    nbOfTickets.put(booking.getCustomer(), booking.getTickets().size());
                 }
             });
 
+            if (nbOfTickets.isEmpty()) {
+                return bestCustomers;
+            }
             int maxNbOfTickets = Collections.max(nbOfTickets.values());
             for (Map.Entry<String, Integer> entry : nbOfTickets.entrySet()) {
                 if (entry.getValue() == maxNbOfTickets) {
@@ -272,6 +268,4 @@ public class APIController {
             throw new IllegalAccessException("Your are not a manager");
         }
     }
-
-
 }

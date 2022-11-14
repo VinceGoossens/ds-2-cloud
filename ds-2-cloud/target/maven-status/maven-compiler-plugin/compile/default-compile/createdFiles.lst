@@ -7,7 +7,6 @@ be/kuleuven/distributedsystems/cloud/Application.class
 be/kuleuven/distributedsystems/cloud/entities/Ticket.class
 be/kuleuven/distributedsystems/cloud/entities/Quote.class
 be/kuleuven/distributedsystems/cloud/auth/WebSecurityConfig.class
-be/kuleuven/distributedsystems/cloud/db/Db.class
 be/kuleuven/distributedsystems/cloud/auth/SecurityFilter.class
 be/kuleuven/distributedsystems/cloud/controller/APIController$2.class
 be/kuleuven/distributedsystems/cloud/entities/User.class
