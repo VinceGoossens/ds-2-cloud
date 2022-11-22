@@ -1,4 +1,4 @@
-import { h, Component } from "https://esm.sh/preact@10.10.6";
+import { h, Component } from "https://esm.sh/preact@10.11.2";
 import htm from "https://esm.sh/htm@3.1.1";
 import { getAuth } from "./state.js";
 
